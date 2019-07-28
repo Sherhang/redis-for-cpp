@@ -95,8 +95,32 @@ int main()
         vector<string> v;
         redis.lrange("list1", 0, -1, v);
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
-    }
     
+    }
+    {
+        cout<<"hgetall测试："<<endl;
+        map<string, string> hash;
+        redis.hgetall("hash1",hash);
+        for(map<string,string>::iterator it=hash.begin();it!=hash.end();++it)
+        {
+            cout<<it->first<<" "<<it->second<<endl;
+
+        }
+        cout<<endl;
+    }
+    {
+        cout<<"exec测试: "<<endl;
+        vector<string> v;
+        redis.exec("set exec success");
+        cout<<redis.get("exec")<<endl;
+        redis.exec("zrange zset1 0 -1", v);
+        cout<<"v.size() = "<<v.size()<<endl;
+        copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        redis.exec("hmget hash1 num0 num1 num2", v);
+        copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+
+    }
     //    cout<<"context exists"<<endl;
-    redis.disconnect();
+    redis.disconnect();//如非必要，不要使用这个接口
+    //cout<<redis.get("string1")<<endl;//已经断开连接，会内存溢出
 }
