@@ -1,3 +1,5 @@
+/*基本使用
+ * */
 #include<iostream>
 #include"credis.h"
 #include"hiredis/hiredis.h"
@@ -33,5 +35,5 @@ int main()
     t = redis.type(key);
     cout<<t<<endl;
     redis.disconnect();
-    //redis.disconnect();
+    redis.disconnect();//重复dis看看
 }

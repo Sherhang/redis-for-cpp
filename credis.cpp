@@ -9,12 +9,12 @@
 #define REDIS_REPLY_ERROR 6
 
 Redis::Redis() : _context(NULL), _reply(NULL), _connected(false) {}
-Redis::Redis(redisContext *context) : _context(context) {}
+Redis::Redis(redisContext *context) : _context(context), _connected(false) {}
 Redis::~Redis() 
 {
     if(_connected)
     {
-        DEBUG<<"free _context"<<std::endl;
+        //DEBUG<<"free _context"<<std::endl;
         ::redisFree(_context);
         _connected = false;
     }
@@ -49,7 +49,7 @@ void Redis::disconnect()
 {
     if(_connected)
     {
-        DEBUG<<"free _context"<<std::endl;
+        //DEBUG<<"free _context"<<std::endl;
         ::redisFree(_context);
         _connected = false;
     }

@@ -21,8 +21,11 @@ RedisConnectPool::~RedisConnectPool()
 	list<redisContext*>::iterator itEnd = _connectPool.end();
 	for (; it != itEnd; it++)
 	{
-	    redisFree(*it);
-	    *it = NULL;
+	    //if(*it != NULL)
+            {
+                redisFree(*it);
+                *it = NULL;
+            }
 	}
 	_connectPool.clear();
     }

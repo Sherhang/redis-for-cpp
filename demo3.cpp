@@ -1,3 +1,5 @@
+/*credis测试
+ * */
 #include<iostream>
 #include"credis.h"
 #include<algorithm>

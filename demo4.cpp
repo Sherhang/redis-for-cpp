@@ -3,6 +3,10 @@
  * */
 
 #include<iostream>
+/*redis连接池方式使用
+ *
+ *
+ * */
 #include<algorithm>
 #include<iterator>
 
@@ -22,38 +26,43 @@ int main()
         cout<<"rc_pool init failure!"<<endl;
         exit(0);
     }
-    //0
-    cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
+    cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
+    
     //1
+    cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
+    cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
     rc_pool.getConnect();
-    cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
-    cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
+    
     //2
-    redisContext* context = rc_pool.getConnect();
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
     cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
-    rc_pool.releaseConnect(context);
+    redisContext* context = rc_pool.getConnect();
+    rc_pool.releaseConnect(context);//回收
 
     //3
-    context = rc_pool.getConnect();
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
     cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
-    Redis redis(context);
+    context = rc_pool.getConnect();
+    Redis redis(context);//初始化，这种方式会自动禁用disconnect
+    redis.set("str", "hello");
     string v;
-    v = redis.get("string1");
+    v = redis.get("str");
     cout<<"get key "<<v<<endl;
-    //redis.disconnect();
+    redis.disconnect();//这句话无效
     rc_pool.releaseConnect(context);//回收
     
     //4
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
     cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
-    context = rc_pool.getConnect();
-    
+    context = rc_pool.getConnect();    
     if(context==NULL)
         cout<<"no context"<<endl;
-    rc_pool.releaseConnect(context);
-    rc_pool.releaseConnect(context);//重复释放，内存溢出
+    Redis redis1(context);
+    cout<<redis1.get("str")<<endl;
 
+    rc_pool.releaseConnect(context);
+    rc_pool.releaseConnect(context);//重复回收
+    cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
+    cout<<"canUse num : "<<rc_pool.getConnectedNum()<<endl;
 }
