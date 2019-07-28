@@ -121,8 +121,8 @@ public:
 
     //--->哈希 hash 类型方法
 	
-    //hash 批量获取所有键值对，初始values为空，与redis的hmget命令不同
-    bool hmget(const std::string& key, std::map<std::string, std::string>& value);
+    //hash 批量获取所有键值对，初始values为空
+    bool hgetall(const std::string& key, std::map<std::string, std::string>& value);
     //--->hash 类型方法 end
 
 
@@ -130,6 +130,15 @@ public:
     //list 获取下标[start, end]区间的元素，end = -1 表示末尾
     bool lrange(const std::string& key, int64_t start, int64_t end, std::vector<std::string>& value);   
     //--->list 类型方法 end
+    
+
+    //--->通用接口
+    //执行不需要返回值的操作
+    bool exec(const std::string& cmd);
+    //执行任意redis操作，如果有返回值，放在vector<string>里面
+    bool exec(const std::string& cmd, std::vector<std::string>& values);
+    //--->通用接口结束
+
 	
     //--->辅助方法
 	

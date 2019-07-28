@@ -1,6 +1,6 @@
 #include "credis.h"
 #include <iostream>
-#define DEBUG std::cout<<__FILE__<<" "<<__func__<<" "<<__LINE__<<" "
+#define DEBUG std::cout<<"[DEBUG] "<<__FILE__<<" "<<__func__<<" "<<__LINE__<<" "
 #define REDIS_REPLY_STRING 1
 #define REDIS_REPLY_ARRAY 2
 #define REDIS_REPLY_INTEGER 3
@@ -29,6 +29,11 @@ void Redis::init(const std::string& ip, int port, const std::string& pwd)
 
 void Redis::connect()
 {
+    if(_connected)
+    {
+        //DEBUG
+        return;
+    }
     _connected = true;
     _context = ::redisConnect(_ip.c_str(), _port);
     if (_context && _context->err)
@@ -409,7 +414,7 @@ bool Redis::zscan(const std::string& key, int64_t cursor, const std::string& pat
 {
     if (count <= 0)
     {
-        // ERROR LOG
+        // DEBUG
         return false;
     }
     std::string cmd = "ZSCAN " + key + " " + num2str<int64_t>(cursor)
@@ -423,7 +428,7 @@ bool Redis::zscan(const std::string& key, int64_t cursor, const std::string& pat
 }
 
 
-bool Redis::hmget(const std::string& key, std::map<std::string, std::string>& value)
+bool Redis::hgetall(const std::string& key, std::map<std::string, std::string>& value)
 {
     if(_context == NULL) 
     {
@@ -484,7 +489,101 @@ bool Redis::lrange(const std::string& key, int64_t start, int64_t end, std::vect
     freeReply(_reply);
     return false;
 }
- 
+
+bool Redis::exec(const std::string& cmd)
+{
+    if(_context==NULL) 
+    {
+        return false;
+    }
+    redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+    if(isError(_reply))
+    {
+        freeReply(_reply);
+        return false;
+    }
+    return true;
+}
+
+bool Redis::exec(const std::string& cmd, std::vector<std::string>& values)
+{
+    values.clear();
+    if(_context==NULL) 
+    {
+        return false;
+    }
+    redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+    if(isError(_reply))
+    {
+        freeReply(_reply);
+        return false;
+    }
+    //DEBUG<<"_reply->type = "<<_reply->type<<std::endl;
+    switch (_reply->type)
+    {
+        case REDIS_REPLY_ERROR:
+        {
+            freeReply(_reply);
+            return false;
+        }
+        break;
+
+        case REDIS_REPLY_ARRAY:
+        {
+            int32_t elements = _reply->elements;
+            values.reserve(elements);
+            for(int32_t i=0; i<elements; ++i)
+            {
+                std::string strTemp(_reply->element[i]->str, _reply->element[i]->len);
+                values.push_back(strTemp);
+            }
+            freeReply(_reply);
+            return true;
+        }
+        break;
+        
+        case REDIS_REPLY_INTEGER:
+        {
+            std::string num = num2str<int64_t>(_reply->integer);
+            values.push_back(num);
+            freeReply(_reply);
+            return true;
+        }
+        break;
+
+        case REDIS_REPLY_STRING:
+        {
+            std::string tmp = _reply->str;
+            values.push_back(tmp);
+            freeReply(_reply);
+            return true;
+        }
+        break;
+
+        case REDIS_REPLY_STATUS:
+        {
+            std::string tmp = _reply->str;
+            values.push_back(tmp);
+            freeReply(_reply);
+            return true;
+        }
+        break;
+
+        case REDIS_REPLY_NIL:
+        {
+            freeReply(_reply);
+            return true;
+        }
+        break;
+
+        default:
+        {
+            freeReply(_reply);
+            return false;
+        }
+    }
+}
+
 //private:
 bool Redis::execReplyStatus(const std::string& cmd)
 {
