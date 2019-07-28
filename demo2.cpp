@@ -34,6 +34,26 @@ int main()
     string key = "str1";
     string t = redis.type(key);
     cout<<"type of str1 is "<<t<<endl;
+    {
+        cout<<"hash操作："<<endl;
+        vector<string> fields={"f1","f2","f3","f4","f5"};
+        vector<string> values={"hv1","hv2","hv3","hv4","hv5"};
+        redis.hmset("hash_test",fields,values);
+        map<string,string> hash;
+        redis.hgetall("hash_test",hash);
+        for(map<string,string>::iterator it=hash.begin();it!=hash.end();++it)
+        {
+            cout<<it->first<<" "<<it->second<<endl;
+        }
+        cout<<endl;
+        values.clear();
+        redis.hmget("hash_test",fields,values);
+        cout<<"hmget"<<endl;
+        copy(values.begin(),values.end(),ostream_iterator<string>(cout," "));cout<<endl;
+        redis.del("hash_test");
+    }
+
+    while(1);
     redis.disconnect();
     redis.disconnect();//重复dis看看
 }

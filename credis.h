@@ -6,6 +6,7 @@
  * reids版本要求2.8.12+
  * 注意：此接口可以单独使用，单独使用时请用无参构造函数。
  * 建议配合redis_connect_pool使用
+ * 除了scan类的命令，所有命令都可以通过exec接口完成
  * */
 #pragma once
 
@@ -121,7 +122,7 @@ public:
 
     //--->哈希 hash 类型方法
     //批量设置
-	bool hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values);
+    bool hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values);
     //批量获取
     bool hmget(const std::string& key, const std::vector<std::string> & fields, std::vector<std::string> & values);
     //hash 批量获取所有键值对，初始values为空

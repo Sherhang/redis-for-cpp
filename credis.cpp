@@ -351,7 +351,7 @@ int64_t Redis::zcount(const std::string& key, double min, double max)
     return ret;
 }
 
-std::string Redis::zincrby(const std::string& key, double incr, const std::string& member)//TODO
+std::string Redis::zincrby(const std::string& key, double incr, const std::string& member)
 {
     std::string ret;
     std::string cmd = "ZINCRBY " + key + " " + num2str<double>(incr) + " " + member;
