@@ -427,6 +427,39 @@ bool Redis::zscan(const std::string& key, int64_t cursor, const std::string& pat
     return false;
 }
 
+bool Redis::hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values)
+{
+    if(_context == NULL || fields.size() != values.size()) 
+    {
+        return false;
+    }
+    if(fields.empty())
+    {
+        return true;
+    }
+    std::string cmd = "HMSET " + key;
+    for(int32_t i = 0; i < fields.size(); ++i)
+    {
+        cmd = cmd + " " + fields[i]+ " " + values[i];
+    }
+    return exec(cmd);
+}
+
+bool Redis::hmget(const std::string& key, const std::vector<std::string> & fields, std::vector<std::string> & values)
+{
+    if(_context == NULL) 
+    {
+        return false;
+    }
+    values.clear();
+    std::string cmd = "HMGET " + key;
+    for(int32_t i = 0; i < fields.size(); ++i)
+    {
+        cmd = cmd + " " + fields[i];
+    }
+    return exec(cmd, values);
+
+}
 
 bool Redis::hgetall(const std::string& key, std::map<std::string, std::string>& value)
 {

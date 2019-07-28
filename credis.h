@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
-#include "hiredis.h"
+#include "hiredis/hiredis.h"
 
 class Redis
 {
@@ -120,7 +120,10 @@ public:
 
 
     //--->哈希 hash 类型方法
-	
+    //批量设置
+	bool hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values);
+    //批量获取
+    bool hmget(const std::string& key, const std::vector<std::string> & fields, std::vector<std::string> & values);
     //hash 批量获取所有键值对，初始values为空
     bool hgetall(const std::string& key, std::map<std::string, std::string>& value);
     //--->hash 类型方法 end
