@@ -34,6 +34,10 @@ int main()
             cout<<"mset success"<<endl;
         redis.mget(keys,values);
         copy(values.begin(),values.end(),ostream_iterator<string>(cout," "));cout<<endl;
+        for(int i=0; i<keys.size(); ++i)
+        {
+            redis.del(keys[i]);
+        }
     }
     {
         cout<<"测试incr, incrBy, incrByFloat, decr, decrBy"<<endl;
@@ -52,6 +56,8 @@ int main()
         string value;
         value = redis.get("z");
         cout<<"不存在key测试"<<endl<<value<<" "<<ret<<endl;
+        redis.del("num");
+        redis.del("z");
     }
     {
         cout<<"zAdd, zCard, zCount 测试："<<endl;
@@ -65,40 +71,50 @@ int main()
         cout<<"zset中元素个数是："<<count<<endl;
         int num = redis.zcount("zset",10, 12);
         cout<<"zset中分数在[10,12]的元素有"<<num<<"个"<<endl;
-    }
-    {
+        redis.del("zset");
+
         cout<<"zIncrBy测试："<<endl;
-        string score=redis.zincrby("zset",10,"ab");
+        map<string,string> z;
+        z["21"]="a";
+        string score=redis.zincrby("zset",10,"a");
         cout<<"new score is "<<score<<endl;
-    }
-    {
+        redis.del("zset");
+    
         cout<<"zRange, zRevRange测试："<<endl;
+        redis.zadd("zset",zset);
         vector<string> values;
-        cout<< redis.zrange("zset",0,-1,values, true)<<endl;
+        cout<< redis.zrange("zset",0,-1,values)<<endl;
         copy(values.begin(), values.end(),ostream_iterator<string>(cout," "));cout<<endl;
         redis.zrevrange("zset", 0, -1, values, true);
         copy(values.begin(), values.end(), ostream_iterator<string>(cout," "));cout<<endl;
-    }
-    {
+
         cout<<"zScore测试："<<endl;
         string sc = redis.zscore("zset","ab");
         cout<<sc<<endl;
-    }
-    {
+    
         cout<<"zScan测试："<<endl;
         vector<string> v;
         redis.zscan("zset",0,"*",-1,v);
         copy(v.begin(),v.end(), ostream_iterator<string>(cout," "));
+        redis.del("zset");
     }
     {
         cout<<"lrange测试："<<endl;
+        for(int i=0;i<10; ++i)
+        {
+            string cmd = "lpush list1 000"+redis.num2str<int>(i);
+            redis.exec(cmd);
+        }
         vector<string> v;
         redis.lrange("list1", 0, -1, v);
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
-    
+        redis.del("list1");
     }
     {
-        cout<<"hgetall测试："<<endl;
+        cout<<"hmset,hgetall测试："<<endl;
+        vector<string> k={"h1","h2","h3","h4"};
+        vector<string> v={"hv1","hv2","hv3","hv4"};
+        redis.hmset("hash1",k,v);
         map<string, string> hash;
         redis.hgetall("hash1",hash);
         for(map<string,string>::iterator it=hash.begin();it!=hash.end();++it)
@@ -107,6 +123,7 @@ int main()
 
         }
         cout<<endl;
+        redis.del("hash1");
     }
     {
         cout<<"exec测试: "<<endl;
@@ -116,7 +133,7 @@ int main()
         redis.exec("zrange zset1 0 -1", v);
         cout<<"v.size() = "<<v.size()<<endl;
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
-        redis.exec("hmget hash1 num0 num1 num2", v);
+        redis.exec("scan 0 ", v);
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
 
     }
