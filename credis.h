@@ -110,13 +110,9 @@ public:
     //返回zset的member的分数，如果该zset没有这个member，返回""
     std::string zscore(const std::string& key, const std::string& member);
 	
-    
-    //Redis Zscan 命令用于迭代有序集合中的元素（包括元素成员和元素分值）
-    //返回的每个元素都是一个有序集合元素，
-    // 一个有序集合元素由一个成员（member）和一个分值（score）组成。
-    //count<0 表示返回所有 TODO
-    bool zscan(const std::string& key, int64_t cursor, const std::string& pattern, int64_t count,
-                std::vector<std::string> & values);
+    //zscan 命令，返回值<0表示调用错误，否则返回下一次游标。返回参数是一个有序map,score-member形式，不要弄反了。如果需要提高效率可以改成unorderedmap。
+    //不要相信count参数的设定，一般来说返回结果不会是count的数目，随缘。
+    int32_t zscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::map<std::string, std::string>& score_member);
     //--->zset 类型方法 end
 
 

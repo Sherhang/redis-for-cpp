@@ -408,23 +408,57 @@ std::string Redis::zscore(const std::string& key, const std::string& member)
     return score;
 }
 
-// TODO 返回list，yhh
-bool Redis::zscan(const std::string& key, int64_t cursor, const std::string& pattern, int64_t count,
-                    std::vector<std::string> & values)
+int32_t Redis::zscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::map<std::string, std::string>& score_member)
 {
+    
+     if(_context==NULL)
+    {
+        //DEBUG<<"NULL"<<std::endl;
+        return -1;
+    }
+    
     if (count <= 0)
     {
         // DEBUG
-        return false;
+        return 0;
     }
-    std::string cmd = "ZSCAN " + key + " " + num2str<int64_t>(cursor)
-                    + (pattern.empty() ? "" : " PATTERN " + pattern)
-                    + (count < 0 ? "" : " COUNT " + num2str<int64_t>(count));
-    if (execReplyArray(cmd, values))
+    std::string cmd = "ZSCAN " + key + " " + num2str<int32_t>(cursor)
+                    + (pattern.empty() ? "" : (" MATCH " + pattern))
+                    + (count < 0 ? "" : " COUNT " + num2str<int32_t>(count));
+    
+    redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+    if(isError(_reply))
     {
-        return true;
+        //DEBUG<<"isError"<<std::endl;
+        freeReply(_reply);
+        return -2;
     }
-    return false;
+    //DEBUG<<"_reply->type "<<_reply->type<<std::endl;
+    if(_reply->type != REDIS_REPLY_ARRAY)
+    {
+        //DEBUG<<"not array"<<std::endl;
+        freeReply(_reply);
+        return -3;
+    }
+    redisReply* sub_reply = (_reply->element[1]);
+    uint32_t len = sub_reply->elements;
+    score_member.clear();
+    if(len & 0x01)
+    {
+        //DEBUG<<"return not match"<<std::endl;
+        return -4;
+    }
+    for(uint32_t i=0;i<len;i=i+2)
+    {
+        std::string sco(sub_reply->element[i]->str, sub_reply->element[i]->len);
+        std::string mem(sub_reply->element[i+1]->str, sub_reply->element[i+1]->len);
+        score_member[sco] = mem;
+    }
+    int32_t ret = -1;
+    std::string strTemp(_reply->element[0]->str, _reply->element[0]->len);
+    ret = str2num<int32_t>(strTemp);
+    freeReply(_reply);
+    return ret;
 }
 
 bool Redis::hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values)

@@ -93,9 +93,13 @@ int main()
         cout<<sc<<endl;
     
         cout<<"zScan测试："<<endl;
-        vector<string> v;
-        redis.zscan("zset",0,"*",-1,v);
-        copy(v.begin(),v.end(), ostream_iterator<string>(cout," "));
+        map<string,string> sm;
+        cout<<"next cusor "<<redis.zscan("zset",0,"",10,sm)<<endl;
+        for(map<string,string>::iterator it=sm.begin();it!=sm.end();++it)
+        {
+            cout<<it->first<<" "<<it->second<<endl;
+        }
+        cout<<endl;
         redis.del("zset");
     }
     {
@@ -114,16 +118,16 @@ int main()
         cout<<"hmset,hgetall测试："<<endl;
         vector<string> k={"h1","h2","h3","h4"};
         vector<string> v={"hv1","hv2","hv3","hv4"};
-        redis.hmset("hash1",k,v);
+        redis.hmset("hash",k,v);
         map<string, string> hash;
-        redis.hgetall("hash1",hash);
+        redis.hgetall("hash",hash);
         for(map<string,string>::iterator it=hash.begin();it!=hash.end();++it)
         {
             cout<<it->first<<" "<<it->second<<endl;
 
         }
         cout<<endl;
-        redis.del("hash1");
+        redis.del("hash");
     }
     {
         cout<<"exec测试: "<<endl;
@@ -136,6 +140,18 @@ int main()
         redis.exec("scan 0 ", v);
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
 
+    }
+    {
+        cout<<"execScan测试："<<endl;
+        vector<string> v;
+        redis.execScan("scan 0",v);cout<<"scan 0"<<endl;
+        copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        redis.execScan("sscan set1 0",v);cout<<"sscan set1 0"<<endl;
+        copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        redis.execScan("hscan hash1 0",v);cout<<"hscan hash1 0"<<endl;
+        copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        redis.execScan("zscan zset1 0",v);cout<<"zscan zset 0"<<endl;
+        copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
     }
     //    cout<<"context exists"<<endl;
     redis.disconnect();//如非必要，不要使用这个接口
