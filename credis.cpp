@@ -142,6 +142,72 @@ int32_t Redis::scan(int32_t cursor, const std::string& pattern, int32_t count, s
     return execScan(cmd, keys);
 }
 
+bool Redis::getKeys(const std::string& yourType, const std::string& pattern, int32_t maxNum, std::vector<std::string>& keys)
+{
+    if(_context==NULL)
+    {
+        //DEBUG<<"NULL"<<std::endl;
+        return false;
+    }
+    int32_t cursor = 0;
+    int32_t count = 10;//100
+    if(maxNum<0)
+    {
+        maxNum = 0x7fffffff;
+    }
+    //DEBUG<<"maxNum "<<maxNum<<std::endl;
+    
+    keys.clear();
+    keys.reserve(maxNum);
+    do
+    {
+        std::string cmd = "SCAN "  + num2str<int32_t>(cursor)
+                    + (pattern.empty() ? "" : (" MATCH " + pattern))
+                    + (count < 0 ? "" : " COUNT " + num2str<int32_t>(count));
+        redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+        if(isError(_reply))
+        {
+            //DEBUG<<"isError"<<std::endl;
+            freeReply(_reply);
+            return false;
+        }
+        //DEBUG<<"_reply->type "<<_reply->type<<std::endl;
+        if(_reply->type != REDIS_REPLY_ARRAY)
+        {
+            //DEBUG<<"not array"<<std::endl;
+            freeReply(_reply);
+            return false;
+        }
+        redisReply* sub_reply = (_reply->element[1]);
+        uint32_t len = sub_reply->elements;
+        for(uint32_t i=0;i<len;++i)
+        {
+            std::string strTemp(sub_reply->element[i]->str, sub_reply->element[i]->len);
+            if(yourType.empty())
+            {
+                keys.push_back(strTemp);
+            }
+            else if(strcasecmp((type(strTemp)).c_str(), yourType.c_str() ) == 0)
+                 {
+                    keys.push_back(strTemp);
+                 }
+            if(keys.size() >= maxNum)
+            {
+                //DEBUG
+                break;
+            }
+        }
+        
+        std::string strTemp(_reply->element[0]->str, _reply->element[0]->len);
+        cursor = str2num<int32_t>(strTemp);//update cursor
+        freeReply(_reply);
+        //DEBUG<<keys.size()<<" "<<cursor<<std::endl;
+
+    } while(keys.size() < maxNum && cursor!=0);
+    return true;
+}
+
+
 int64_t Redis::ttl(const std::string& key)
 {
     int64_t ret = -3;
@@ -743,7 +809,7 @@ int32_t Redis::execScan(const std::string& cmd, std::vector<std::string>& values
     }
     redisReply* sub_reply = (_reply->element[1]);
     int32_t len = sub_reply->elements;
-    values.clear();
+    values.clear();//
     values.reserve(len);
     for(int32_t i=0;i<len;++i)
     {

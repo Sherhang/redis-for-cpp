@@ -42,11 +42,16 @@ public:
     //以 unix timestamp格式设置 key 的过期时间。key 过期后将不再可用。
     bool expireat(const std::string& key, int64_t timestamp);//TODO
 
-    //查找所有符合给定模式 pattern 的 key，数据量很大请勿使用。
+    //查找所有符合给定模式 pattern 的 key，数据量很大请勿使用，可以使用getKeys。
     bool keys(const std::string& pattern, std::vector<std::string>& key_list);
 
     //scan遍历keys,返回下一次游标位置，调用错误返回负数。
     int32_t scan(int32_t cursor, const std::string& pattern, int32_t count, std::vector<std::string>& keys);
+    
+    //获取所有满足模式pattern并且是指定类型的keys, 可以指定获取的最大个数，max = -1 表示获取所有。内部采用游标实现。
+    //指定类型可以是 none, string, set, zset, list, hash,忽略大小写，请不要添加任何空格。类型为""表示获取所有类型。
+    //模式为""表示所有模式。
+    bool getKeys(const std::string& yourType, const std::string& pattern, int32_t maxNum, std::vector<std::string>& keys); 
 
     //返回 key 的剩余过期时间，调用失败返回 -3。
     //当 key 不存在时，返回 -2 。当 key 存在但没有设置剩余生存时间时，返回 -1 。
