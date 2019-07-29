@@ -617,6 +617,43 @@ bool Redis::exec(const std::string& cmd, std::vector<std::string>& values)
     }
 }
 
+int32_t Redis::execScan(const std::string& cmd, std::vector<std::string>& values)
+{
+    if(_context==NULL)
+    {
+        DEBUG<<"NULL"<<std::endl;
+        return -1;
+    }
+    redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+    if(isError(_reply))
+    {
+        DEBUG<<"isError"<<std::endl;
+        freeReply(_reply);
+        return -2;
+    }
+    DEBUG<<"_reply->type "<<_reply->type<<std::endl;
+    if(_reply->type != REDIS_REPLY_ARRAY)
+    {
+        DEBUG<<"not array"<<std::endl;
+        freeReply(_reply);
+        return -3;
+    }
+    redisReply* sub_reply = (_reply->element[1]);
+    int32_t len = sub_reply->elements;
+    values.clear();
+    values.reserve(len);
+    for(int32_t i=0;i<len;++i)
+    {
+        std::string strTemp(sub_reply->element[i]->str, sub_reply->element[i]->len);
+        values.push_back(strTemp);
+    }
+    int32_t ret = -1;
+    std::string strTemp(_reply->element[0]->str, _reply->element[0]->len);
+    ret = str2num<int32_t>(strTemp);
+    freeReply(_reply);
+    return ret;
+}
+
 //private:
 bool Redis::execReplyStatus(const std::string& cmd)
 {

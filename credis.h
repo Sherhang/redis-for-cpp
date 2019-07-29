@@ -141,6 +141,8 @@ public:
     bool exec(const std::string& cmd);
     //执行任意redis操作，如果有返回值，放在vector<string>里面
     bool exec(const std::string& cmd, std::vector<std::string>& values);
+    //执行scan类命令
+    int32_t execScan(const std::string& cmd, std::vector<std::string>& values);
     //--->通用接口结束
 
 	
