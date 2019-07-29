@@ -154,10 +154,8 @@ redisContext * RedisConnectPool::getConnect(int retry)
 
 void RedisConnectPool::releaseConnect(redisContext *redisConn)
 {
-    //防止回收NULL
     if(redisConn == NULL)
         return ;
-    //防止重复回收
     if(find(_connectPool.begin(), _connectPool.end(), redisConn) != _connectPool.end())
     {
         return;
@@ -174,7 +172,7 @@ void RedisConnectPool::releaseConnect(redisContext *redisConn)
             }
             
 	    _connectPool.push_back(redisConn);
-            _iUsedCount--;
+        _iUsedCount--;
 	}
 
 	return;
@@ -215,12 +213,12 @@ bool RedisConnectPool::isUseful(redisContext* &redisConn)
 		if (strRet.find("PONG") != string::npos)
 		{
 			freeReplyObject(reply);
-                        reply = NULL;
+            reply = NULL;
 		}
 	}
     if(reply)
     {
-	freeReplyObject(reply);
+	    freeReplyObject(reply);
         reply = NULL;
     }
 	

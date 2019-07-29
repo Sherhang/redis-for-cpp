@@ -43,11 +43,11 @@ private:
 class RedisConnectPool
 {
 public:
-	RedisConnectPool();
-	~RedisConnectPool();
+	    RedisConnectPool();
+	    ~RedisConnectPool();
         //初始化时会连接_iPoolSize 个 client，放在链表里面
-	bool init(int iPoolSize, const std::string& redisIP, int redisPort, const std::string& passwd);
-	//从链表头部取得一个连接
+	    bool init(int iPoolSize, const std::string& redisIP, int redisPort, const std::string& passwd);
+	    //从链表头部取得一个连接
         redisContext * getConnect();
         //重复连接retry次, 这是为了防止取到NULL，基本不用
         redisContext * getConnect(int retry);
@@ -56,20 +56,19 @@ public:
         bool isUseful(redisContext* &redisConn);
 protected:
         redisContext * connect();
-	bool initConnectPool();
-	//bool isUseful(redisContext* &redisConn);
-	bool reConnect(redisContext* &redisConn);
+	    bool initConnectPool();
+	    //bool isUseful(redisContext* &redisConn);
+	    bool reConnect(redisContext* &redisConn);
 
 private:
-	int _iPoolSize;
-	int _iUsedCount;
+	    int _iPoolSize;
+	    int _iUsedCount;
         std::string _redisIP;
         std::string _passwd;
         int _redisProt;
         std::list<redisContext*> _connectPool;
-	pthread_mutex_t _mutex;
+	    pthread_mutex_t _mutex;
         bool _needPasswd;
-        //static TC_ThreadLock _lock;
 public:
         int getUsedCount()
         {
@@ -80,6 +79,4 @@ public:
             return _connectPool.size();
         }
 };
-
-
 

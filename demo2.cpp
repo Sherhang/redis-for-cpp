@@ -54,7 +54,7 @@ int main()
     }
     cout<<"获取string类型的keys:"<<endl;
     vector<string> ks;
-    redis.getKeys("", "str*", 35,ks);
+    redis.getKeys("strinG", "str*", 35,ks);
     cout<<"共获取keys个数："<<ks.size()<<endl;
     copy(ks.begin(),ks.end(),ostream_iterator<string>(cout," "));cout<<endl;
 
