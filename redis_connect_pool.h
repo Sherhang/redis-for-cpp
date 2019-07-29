@@ -9,7 +9,6 @@
 #include <vector>
 #include <list>
 #include <pthread.h>
-#include "hiredis.h"
 #include "credis.h"
 
 struct RedisConnects
@@ -54,11 +53,11 @@ public:
         redisContext * getConnect(int retry);
         //回收连接，放回链表末尾
         void releaseConnect(redisContext *redisConn);
-
+        bool isUseful(redisContext* &redisConn);
 protected:
         redisContext * connect();
 	bool initConnectPool();
-	bool isUsefull(redisContext* &redisConn);
+	//bool isUseful(redisContext* &redisConn);
 	bool reConnect(redisContext* &redisConn);
 
 private:
@@ -76,7 +75,7 @@ public:
         {
             return _iUsedCount;
         }
-        int getConnectedNum()
+        int getCanUseNum()
         {
             return _connectPool.size();
         }

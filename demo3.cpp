@@ -34,6 +34,11 @@ int main()
             cout<<"mset success"<<endl;
         redis.mget(keys,values);
         copy(values.begin(),values.end(),ostream_iterator<string>(cout," "));cout<<endl;
+        values.clear();
+        cout<<"测试scan:"<<endl;
+        cout<<"next cursor is "<<redis.scan(0,"",-1,values)<<endl;
+        cout<<"scan keys "<<endl;
+        copy(values.begin(),values.end(),ostream_iterator<string>(cout," "));cout<<endl;
         for(int i=0; i<keys.size(); ++i)
         {
             redis.del(keys[i]);
@@ -127,6 +132,14 @@ int main()
 
         }
         cout<<endl;
+        cout<<"hscan测试："<<endl;
+        map<string,string> kv;
+        cout<<"next cusor "<<redis.hscan("hash",0,"h?",10,kv)<<endl;
+        for(map<string,string>::iterator it=kv.begin();it!=kv.end();++it)
+        {
+            cout<<it->first<<" "<<it->second<<endl;
+        }
+        cout<<endl;
         redis.del("hash");
     }
     {
@@ -138,6 +151,14 @@ int main()
         cout<<"v.size() = "<<v.size()<<endl;
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
         redis.exec("scan 0 ", v);
+        copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        redis.exec("sadd set1 201");
+        redis.exec("sadd set1 202");
+        redis.exec("sadd set1 203");
+        redis.exec("sadd set1 204");
+        redis.exec("sadd set1 205");
+        cout<<"sscan测试："<<endl;
+        cout<<"next cursor is "<<redis.sscan("set1",0,"*0*",3,v)<<endl;
         copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
 
     }
@@ -152,6 +173,10 @@ int main()
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
         redis.execScan("zscan zset1 0",v);cout<<"zscan zset 0"<<endl;
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+        cout<<"无效命令测试："<<endl;
+        cout<<"返回值："<<redis.exec("sse ysh",v)<<endl;
+        copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
+
     }
     //    cout<<"context exists"<<endl;
     redis.disconnect();//如非必要，不要使用这个接口

@@ -1,14 +1,14 @@
 /* @yehang@sjtu.edu.cn
+ * @2019.07.20
  * c++版本的redis接口, 自动管理连接释放。
  * 所有接口设计按照redis终端操作来设计，接口方法全部小写
  * 如果方法返回一个数值或者判断，那么将结果作为方法返回值，否则以输出参数的形式进行返回
- * @2019.06.20
  * reids版本要求2.8.12+
- * 注意：此接口可以单独使用，单独使用时请用无参构造函数。
- * 建议配合redis_connect_pool使用
- * 除了scan类的命令，所有命令都可以通过exec接口完成
+ * 注意：此接口可以单独使用，单独使用时请用无参构造函数。建议配合redis_connect_pool使用。
+ * 注意：scan一类的方法如果需要迭代使用，请保证在同一个连接下进行。
+ * 
  * */
-#pragma once
+#pragma once    //请勿使用ifdef那种形式
 
 #include <string>
 #include <string.h>//strcmpcase
@@ -42,8 +42,11 @@ public:
     //以 unix timestamp格式设置 key 的过期时间。key 过期后将不再可用。
     bool expireat(const std::string& key, int64_t timestamp);//TODO
 
-    //查找所有符合给定模式 pattern 的 key
-    bool keys(const std::string& pattern, std::vector<std::string>& key_list);//yhh
+    //查找所有符合给定模式 pattern 的 key，数据量很大请勿使用。
+    bool keys(const std::string& pattern, std::vector<std::string>& key_list);
+
+    //scan遍历keys,返回下一次游标位置，调用错误返回负数。
+    int32_t scan(int32_t cursor, const std::string& pattern, int32_t count, std::vector<std::string>& keys);
 
     //返回 key 的剩余过期时间，调用失败返回 -3。
     //当 key 不存在时，返回 -2 。当 key 存在但没有设置剩余生存时间时，返回 -1 。
@@ -115,14 +118,25 @@ public:
     int32_t zscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::map<std::string, std::string>& score_member);
     //--->zset 类型方法 end
 
+    //--->普通集合 set 类型接口
+    //sscan遍历keys,返回下一次游标位置，调用错误返回负数。后续将改为unorderedset TODO
+    int32_t sscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::vector<std::string>& keys);
+    //--->普通集合 set 类型接口 end
+
 
     //--->哈希 hash 类型方法
     //批量设置
     bool hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values);
+
     //批量获取
     bool hmget(const std::string& key, const std::vector<std::string> & fields, std::vector<std::string> & values);
+
     //hash 批量获取所有键值对，初始values为空
     bool hgetall(const std::string& key, std::map<std::string, std::string>& value);
+
+    //hscan 命令，返回值<0表示调用错误，否则返回下一次游标。返回参数是一个有序map, key_value形式。如果需要提高效率可以改成unorderedmap。
+    //不要相信count参数的设定，一般来说返回结果不会是count的数目，随缘。
+    int32_t hscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::map<std::string, std::string>& key_value);
     //--->hash 类型方法 end
 
 
@@ -132,16 +146,18 @@ public:
     //--->list 类型方法 end
     
 
-    //--->通用接口
+    //--->通用接口,如非必要，请不要使用
     //执行不需要返回值的操作
     bool exec(const std::string& cmd);
+
     //执行任意redis操作，如果有返回值，放在vector<string>里面
     bool exec(const std::string& cmd, std::vector<std::string>& values);
+
     //执行scan类命令
     int32_t execScan(const std::string& cmd, std::vector<std::string>& values);
     //--->通用接口结束
 
-	
+
     //--->辅助方法
 	
     //数字转字符串
@@ -186,6 +202,6 @@ private:
     std::string _ip;
     int32_t _port;
     std::string _pwd;
-    bool _connected;//是否已经连接到redis服务端
+    bool _connected;
 };
 

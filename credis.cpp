@@ -134,6 +134,14 @@ bool Redis::keys(const std::string& pattern, std::vector<std::string>& key_list)
     return false;
 }
 
+int32_t Redis::scan(int32_t cursor, const std::string& pattern, int32_t count, std::vector<std::string>& keys)
+{
+    std::string cmd = "SCAN "  + num2str<int32_t>(cursor)
+                    + (pattern.empty() ? "" : (" MATCH " + pattern))
+                    + (count < 0 ? "" : " COUNT " + num2str<int32_t>(count));
+    return execScan(cmd, keys);
+}
+
 int64_t Redis::ttl(const std::string& key)
 {
     int64_t ret = -3;
@@ -450,8 +458,8 @@ int32_t Redis::zscan(const std::string& key, int32_t cursor, const std::string& 
     }
     for(uint32_t i=0;i<len;i=i+2)
     {
-        std::string sco(sub_reply->element[i]->str, sub_reply->element[i]->len);
-        std::string mem(sub_reply->element[i+1]->str, sub_reply->element[i+1]->len);
+        std::string mem(sub_reply->element[i]->str, sub_reply->element[i]->len);
+        std::string sco(sub_reply->element[i+1]->str, sub_reply->element[i+1]->len);
         score_member[sco] = mem;
     }
     int32_t ret = -1;
@@ -459,6 +467,14 @@ int32_t Redis::zscan(const std::string& key, int32_t cursor, const std::string& 
     ret = str2num<int32_t>(strTemp);
     freeReply(_reply);
     return ret;
+}
+
+int32_t Redis::sscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::vector<std::string>& keys)
+{
+    std::string cmd = "SSCAN " + key + " " + num2str<int32_t>(cursor)
+                    + (pattern.empty() ? "" : (" MATCH " + pattern))
+                    + (count < 0 ? "" : " COUNT " + num2str<int32_t>(count));
+    return execScan(cmd, keys);
 }
 
 bool Redis::hmset(const std::string& key, const std::vector<std::string> & fields, const std::vector<std::string> & values)
@@ -525,6 +541,59 @@ bool Redis::hgetall(const std::string& key, std::map<std::string, std::string>& 
     }
     freeReply(_reply);
     return false;
+}
+
+int32_t Redis::hscan(const std::string& key, int32_t cursor, const std::string& pattern, int32_t count, std::map<std::string, std::string>& key_value)
+{
+    
+     if(_context==NULL)
+    {
+        //DEBUG<<"NULL"<<std::endl;
+        return -1;
+    }
+    
+    if (count <= 0)
+    {
+        // DEBUG
+        return 0;
+    }
+    std::string cmd = "HSCAN " + key + " " + num2str<int32_t>(cursor)
+                    + (pattern.empty() ? "" : (" MATCH " + pattern))
+                    + (count < 0 ? "" : " COUNT " + num2str<int32_t>(count));
+    
+    redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
+    if(isError(_reply))
+    {
+        //DEBUG<<"isError"<<std::endl;
+        freeReply(_reply);
+        return -2;
+    }
+    //DEBUG<<"_reply->type "<<_reply->type<<std::endl;
+    if(_reply->type != REDIS_REPLY_ARRAY)
+    {
+        //DEBUG<<"not array"<<std::endl;
+        freeReply(_reply);
+        return -3;
+    }
+    redisReply* sub_reply = (_reply->element[1]);
+    uint32_t len = sub_reply->elements;
+    key_value.clear();
+    if(len & 0x01)
+    {
+        //DEBUG<<"return not match"<<std::endl;
+        return -4;
+    }
+    for(uint32_t i=0;i<len;i=i+2)
+    {
+        std::string key(sub_reply->element[i]->str, sub_reply->element[i]->len);
+        std::string val(sub_reply->element[i+1]->str, sub_reply->element[i+1]->len);
+        key_value[key] = val;
+    }
+    int32_t ret = -1;
+    std::string strTemp(_reply->element[0]->str, _reply->element[0]->len);
+    ret = str2num<int32_t>(strTemp);
+    freeReply(_reply);
+    return ret;
 }
 
 bool Redis::lrange(const std::string& key, int64_t start, int64_t end, std::vector<std::string>& value)
@@ -655,20 +724,20 @@ int32_t Redis::execScan(const std::string& cmd, std::vector<std::string>& values
 {
     if(_context==NULL)
     {
-        DEBUG<<"NULL"<<std::endl;
+        //DEBUG<<"NULL"<<std::endl;
         return -1;
     }
     redisReply* _reply = (redisReply*)::redisCommand(_context, cmd.c_str());
     if(isError(_reply))
     {
-        DEBUG<<"isError"<<std::endl;
+        //DEBUG<<"isError"<<std::endl;
         freeReply(_reply);
         return -2;
     }
-    DEBUG<<"_reply->type "<<_reply->type<<std::endl;
+    //DEBUG<<"_reply->type "<<_reply->type<<std::endl;
     if(_reply->type != REDIS_REPLY_ARRAY)
     {
-        DEBUG<<"not array"<<std::endl;
+        //DEBUG<<"not array"<<std::endl;
         freeReply(_reply);
         return -3;
     }

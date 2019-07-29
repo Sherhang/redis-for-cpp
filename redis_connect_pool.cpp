@@ -19,7 +19,7 @@ RedisConnectPool::~RedisConnectPool()
 	MutexGuard guard(&_mutex);
 	list<redisContext*>::iterator it = _connectPool.begin();
 	list<redisContext*>::iterator itEnd = _connectPool.end();
-	for (; it != itEnd; it++)
+	for (; it != itEnd; ++it)
 	{
 	    //if(*it != NULL)
             {
@@ -133,9 +133,6 @@ redisContext * RedisConnectPool::getConnect()
 	{
 		reConnect(retConn);
 	}
-    if(retConn == NULL)
-    {
-    }
 
 	return retConn;
 }
@@ -197,7 +194,7 @@ bool RedisConnectPool::reConnect(redisContext* &redisConn)
 	return true;
 }
 
-bool RedisConnectPool::isUsefull(redisContext* &redisConn)
+bool RedisConnectPool::isUseful(redisContext* &redisConn)
 {
 	if (NULL == redisConn)
 	{
