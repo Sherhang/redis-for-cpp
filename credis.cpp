@@ -272,7 +272,7 @@ bool Redis::mset(const std::vector<std::string> & keys, const std::vector<std::s
     int len = keys.size()+values.size();
     int argc = 1;
     size_t argvlen[len+1];
-    argvlen[0] = 4; //"mget"
+    argvlen[0] = 4; 
     
     const char* argv[len+1];
     char argv1[] = "MSET";
@@ -288,7 +288,6 @@ bool Redis::mset(const std::vector<std::string> & keys, const std::vector<std::s
         argv[argc] = values[t].c_str();
         argc++;
     }
-    //redis.mget(argc, argv, argvlen);
     redisReply* _reply = (redisReply*)::redisCommandArgv(_context, argc, argv, argvlen);
     if (_reply && _reply->type == REDIS_REPLY_STATUS )
     {
@@ -318,7 +317,7 @@ bool Redis::mget(const std::vector<std::string>& keys, std::vector<std::string>&
     values.reserve(len);
     uint32_t argc = 1;
     size_t argvlen[len+1];
-    argvlen[0] = 4; //"mget"
+    argvlen[0] = 4; 
     
     const char* argv[len+1];
     char argv1[] = "MGET";
@@ -331,7 +330,6 @@ bool Redis::mget(const std::vector<std::string>& keys, std::vector<std::string>&
         argc++;
     }
 
-    //redis.mget(argc, argv, argvlen);
     redisReply* _reply = (redisReply*)::redisCommandArgv(_context, argc, argv, argvlen);
     
     if (_reply && _reply->type == REDIS_REPLY_ARRAY)
