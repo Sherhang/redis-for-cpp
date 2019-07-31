@@ -7,16 +7,29 @@ using namespace std;
 
 //TC_ThreadLock RedisConnectPool::_lock;
 
-RedisConnectPool::RedisConnectPool()
+RedisConnectPool::RedisConnectPool():_lock(true) 
 {
-	pthread_mutex_init(&_mutex, NULL);
+    pthread_mutex_init(&_mutex, NULL);
+}
+
+
+RedisConnectPool::RedisConnectPool(bool lock)
+{
+    _lock = lock;
+    if(_lock)
+    {
+	    pthread_mutex_init(&_mutex, NULL);
+    }
 
 }
 
 RedisConnectPool::~RedisConnectPool()
 {
+    
+    if(_lock)
     {
-	MutexGuard guard(&_mutex);
+	    MutexGuard guard(&_mutex);
+    }
 	list<redisContext*>::iterator it = _connectPool.begin();
 	list<redisContext*>::iterator itEnd = _connectPool.end();
 	for (; it != itEnd; ++it)
@@ -28,9 +41,11 @@ RedisConnectPool::~RedisConnectPool()
             }
 	}
 	_connectPool.clear();
+    
+    if(_lock)
+    {
+	    pthread_mutex_destroy(&_mutex);
     }
-
-	pthread_mutex_destroy(&_mutex);
 }
 
 bool RedisConnectPool::init(int iPoolSize, const string& redisIP, int redisPort, const string& passwd)
