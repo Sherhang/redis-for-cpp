@@ -12,7 +12,7 @@
 using namespace std;
 
 int main()
-{   int pool_size = 3;
+{   int pool_size = 5000;
     string ip = "127.0.0.1";
     int port = 6379;
     string passwd ="yehang0201";
@@ -39,7 +39,7 @@ int main()
     r1.set("hello", "hi");
     cout<<r1.get("hello")<<endl;
     r1.del("hello");
-    //rc_pool.releaseConnect(context);//回收
+    rc_pool.releaseConnect(context);//回收
 
     //3
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
@@ -73,4 +73,7 @@ int main()
     //5
     cout<<"used num : "<<rc_pool.getUsedCount()<<endl;
     cout<<"canUse num : "<<rc_pool.getCanUseNum()<<endl;
+    vector<string> vs;
+    redis.keys("*",vs);
+    //for(;;);
 }

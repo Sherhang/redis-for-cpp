@@ -167,9 +167,9 @@ int main()
         vector<string> v;
         redis.execScan("scan 0",v);cout<<"scan 0"<<endl;
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
-        redis.execScan("sscan set1 0",v);cout<<"sscan set1 0"<<endl;
+        redis.execScan("sscan set1 0",v);cout<<"sscan set1 0 count 10"<<endl;
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
-        redis.execScan("hscan hash1 0",v);cout<<"hscan hash1 0"<<endl;
+        redis.execScan("hscan hash1 0 count 10",v);cout<<"hscan hash1 0 count 10"<<endl;
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;
         redis.execScan("zscan zset1 0",v);cout<<"zscan zset 0"<<endl;
         copy(v.begin(),v.end(), ostream_iterator<string>(cout, " "));cout<<endl;

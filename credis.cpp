@@ -1,6 +1,7 @@
 #include "credis.h"
 #include <iostream>
-#define DEBUG std::cout<<"[DEBUG] "<<__FILE__<<" "<<__func__<<" "<<__LINE__<<" "
+#define DEBUG std::cout<<"[DEBUG]"<<__FILE__<<"|"<<__func__<<"|"<<"LINE"<<__LINE__<<" "
+
 #define REDIS_REPLY_STRING 1
 #define REDIS_REPLY_ARRAY 2
 #define REDIS_REPLY_INTEGER 3
@@ -150,7 +151,7 @@ bool Redis::getKeys(const std::string& yourType, const std::string& pattern, int
         return false;
     }
     int32_t cursor = 0;
-    int32_t count = 10;//100
+    int32_t count = 100;
     if(maxNum<0)
     {
         maxNum = 0x7fffffff;
@@ -552,7 +553,7 @@ bool Redis::hmset(const std::string& key, const std::vector<std::string> & field
         return true;
     }
     std::string cmd = "HMSET " + key;
-    for(int32_t i = 0; i < fields.size(); ++i)
+    for(uint32_t i = 0; i < fields.size(); ++i)
     {
         cmd = cmd + " " + fields[i]+ " " + values[i];
     }
@@ -567,7 +568,7 @@ bool Redis::hmget(const std::string& key, const std::vector<std::string> & field
     }
     values.clear();
     std::string cmd = "HMGET " + key;
-    for(int32_t i = 0; i < fields.size(); ++i)
+    for(uint32_t i = 0; i < fields.size(); ++i)
     {
         cmd = cmd + " " + fields[i];
     }

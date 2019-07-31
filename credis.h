@@ -12,6 +12,7 @@
 
 #include <string>
 #include <string.h>//strcmpcase
+#include <cstdlib>
 #include <map>
 #include <vector>
 #include <sstream>

@@ -162,7 +162,7 @@ void RedisConnectPool::releaseConnect(redisContext *redisConn)
     }
     MutexGuard guard(&_mutex);    
 	if(redisConn != NULL)
-        {
+    {
             if(redisConn->err)
             {
                 if (!reConnect(redisConn)) 
@@ -170,9 +170,11 @@ void RedisConnectPool::releaseConnect(redisContext *redisConn)
                     return;
                 }
             }
-            
-	    _connectPool.push_back(redisConn);
-        _iUsedCount--;
+        if(isUseful(redisConn))
+        {
+	        _connectPool.push_back(redisConn);
+            _iUsedCount--;
+        }
 	}
 
 	return;
