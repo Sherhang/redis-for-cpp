@@ -43,8 +43,7 @@ private:
 class RedisConnectPool
 {
 public:
-        RedisConnectPool();
-        RedisConnectPool(bool lock);
+	    RedisConnectPool();
 	    ~RedisConnectPool();
         //初始化时会连接_iPoolSize 个 client，放在链表里面
 	    bool init(int iPoolSize, const std::string& redisIP, int redisPort, const std::string& passwd);
@@ -70,7 +69,6 @@ private:
         std::list<redisContext*> _connectPool;
 	    pthread_mutex_t _mutex;
         bool _needPasswd;
-        bool _lock;
 public:
         int getUsedCount()
         {
