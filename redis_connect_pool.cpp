@@ -12,7 +12,6 @@ RedisConnectPool::RedisConnectPool():_lock(true)
     pthread_mutex_init(&_mutex, NULL);
 }
 
-
 RedisConnectPool::RedisConnectPool(bool lock)
 {
     _lock = lock;
@@ -50,7 +49,10 @@ RedisConnectPool::~RedisConnectPool()
 
 bool RedisConnectPool::init(int iPoolSize, const string& redisIP, int redisPort, const string& passwd)
 {
-    MutexGuard guard(&_mutex);    
+    if(_lock)
+    {
+        MutexGuard guard(&_mutex);
+    }
     _redisIP = redisIP;
     _redisProt = redisPort;
     _passwd = passwd;
@@ -130,7 +132,11 @@ redisContext * RedisConnectPool::connect()
 redisContext * RedisConnectPool::getConnect()
 {
 	redisContext *retConn = NULL;
-	MutexGuard guard(&_mutex);    
+	if(_lock)
+    {
+        MutexGuard guard(&_mutex);
+    }
+
 	{
 		if (_connectPool.empty())
 		{
@@ -175,7 +181,10 @@ void RedisConnectPool::releaseConnect(redisContext *redisConn)
     {
         return;
     }
-    MutexGuard guard(&_mutex);    
+    if(_lock)
+    {
+        MutexGuard guard(&_mutex);    
+    }
 	if(redisConn != NULL)
     {
             if(redisConn->err)
