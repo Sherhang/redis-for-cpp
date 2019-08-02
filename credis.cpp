@@ -41,14 +41,24 @@ void Redis::connect()
     {
         exit(EXIT_FAILURE);
     }
-    std::vector<std::string> status;
-    exec("PING",status);
-    if((!status.empty()) && strcasecmp(status[0].c_str(),"PONG") == 0)
+    if(_pwd.empty())
     {
-        return ;
+        std::vector<std::string> status;
+        exec("PING",status);
+        if((!status.empty()) && strcasecmp(status[0].c_str(),"PONG") == 0)
+        {
+            return ;
+        }
+        else
+        {
+            //debug
+            exit(EXIT_FAILURE);
+        }
     }
+
     if (auth(_pwd))
     {
+        //debug
     }
     else
     {

@@ -10,7 +10,6 @@ int main()
     }
 
     redisReply *reply;
-    reply = (redisReply*)redisCommand(conn, "auth %s", "yehang0201");
     reply = (redisReply*)redisCommand(conn, "SET %s %s", "foo", "bar");
     freeReplyObject(reply);
 

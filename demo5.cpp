@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
     Redis redis;
-    redis.init("127.0.0.1",6379,"yehang0201");
+    redis.init("127.0.0.1",6379,"");
     redis.connect();
     for(char k='a';k<='z';++k)
     {

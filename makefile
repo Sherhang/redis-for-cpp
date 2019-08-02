@@ -25,4 +25,4 @@ $(realay):%:%:.o
 .PHONY:all clean
 clean:
 	@echo "clean all .o and exe: "
-	rm -rf  $(obj) $(target)
+	rm -rf  $(obj) $(target) ./file/*.txt

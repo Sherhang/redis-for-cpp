@@ -10,7 +10,7 @@ int main()
     Redis redis;
     string ip="127.0.0.1";
     int port = 6379;
-    string password="yehang0201";
+    string password="";
     redis.init(ip, port, password);//init
     redis.connect();//connect
     vector<string> keys={"str1","str2","str3","str4","str5"};

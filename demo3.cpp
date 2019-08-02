@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
     Redis redis;
-    string ip="127.0.0.1", pwd="yehang0201";
+    string ip="127.0.0.1", pwd="";
     int port = 6379;
     redis.init(ip, port, pwd);
     redis.connect();

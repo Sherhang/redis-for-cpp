@@ -12,10 +12,10 @@
 using namespace std;
 
 int main()
-{   int pool_size = 5000;
+{   int pool_size = 100;
     string ip = "127.0.0.1";
     int port = 6379;
-    string passwd ="yehang0201";
+    string passwd ="yehang";
     RedisConnectPool rc_pool;
     if(!rc_pool.init(pool_size, ip, port, passwd))
     {

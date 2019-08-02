@@ -76,11 +76,12 @@ redisContext * RedisConnectPool::connect()
         redisConn = NULL;
         return NULL;
     }
-    if (!_needPasswd) 
+    if (!_needPasswd ) 
     {
+        //debug 
         return redisConn;
     }
-    std::string cmd = "AUTH " + _passwd;
+    std::string cmd = "AUTH " + (_passwd.empty()? "1245678" : _passwd);
     redisReply *reply = (redisReply*)::redisCommand(redisConn, cmd.c_str());
     if (reply == NULL && redisConn->err != 0)
     {
