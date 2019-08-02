@@ -41,6 +41,12 @@ void Redis::connect()
     {
         exit(EXIT_FAILURE);
     }
+    std::vector<std::string> status;
+    exec("PING",status);
+    if((!status.empty()) && strcasecmp(status[0].c_str(),"PONG") == 0)
+    {
+        return ;
+    }
     if (auth(_pwd))
     {
     }
